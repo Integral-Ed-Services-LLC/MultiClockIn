@@ -8,7 +8,7 @@ export function useEntry() {
 
 export const EntryProvider = ({ children }) => {
     const params = new URLSearchParams(window.location.search);
-    const initialUserRecordId = params.get('userRecordId') || "recMhLRHRvxzjIHpn";
+    const initialUserRecordId = params.get('userRecordId');
     const [entry, setEntry] = useState({
         userName: "",
         userRecordId: initialUserRecordId,
