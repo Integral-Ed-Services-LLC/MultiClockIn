@@ -6,7 +6,7 @@
     height: 39px;
     position: fixed;
     padding: 0.5rem 15px 0.5rem 15px;
-    background-color: hsl(0, 0%, 92.2%);
+    background-color: var(--light-grey)
   }
   /* .logo-div{
   
@@ -31,12 +31,12 @@
   }
   .my-time-entries-btn {
     background-color: inherit;
-    color: hsl(216.9, 19.1%, 26.7%);
+    color: var(--dark-grey);
     margin-right: 20px;
   }
   
   .clock-in-btn {
-    background-color: hsl(95.7, 61.5%, 41.8%);
+    background-color: var(--green);
     height: 32px;
     line-height: 2px;
     margin-right: 25px;

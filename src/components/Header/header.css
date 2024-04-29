@@ -1,0 +1,13 @@
+.header-outer-div{
+    position: relative;
+    top: 80px;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    background-color: var(--white);
+}
+
+.header-text{
+    font-size: 20px;
+    color: var(--black);
+}

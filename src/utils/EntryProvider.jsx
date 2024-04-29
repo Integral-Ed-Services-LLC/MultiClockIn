@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'
-import { getTeammateRecord } from '../helpers/airtableGetters';
+import { getTeammateRecord, getProductNameAndID } from '../helpers/airtableGetters';
 
 const EntryContext = createContext();
 export function useEntry() {
@@ -9,7 +9,7 @@ export function useEntry() {
 export const EntryProvider = ({ children }) => {
     const params = new URLSearchParams(window.location.search);
     const initialUserRecordId = params.get('userRecordID') 
-    // || "recMhLRHRvxzjIHpn";
+    || "recMhLRHRvxzjIHpn";
     const [entry, setEntry] = useState({
         userName: "",
         userRecordId: initialUserRecordId,
@@ -20,7 +20,7 @@ export const EntryProvider = ({ children }) => {
         endTimeArr: [],
         durationArr: [],
         jobCodeArr: [],
-        jobCodeRecordIdArr: [],
+        jobCodeRecordIdArr: {},
         taskIdArr: [],
         notesArr: [],
         dayAmount: "0:00",
@@ -29,6 +29,7 @@ export const EntryProvider = ({ children }) => {
         showConfirmModal: false,
         showErrorModal: false,
         handleModalClose: false,
+        entryRows: 3,
         submittedRecordIdArr: []
     })
 
@@ -37,7 +38,7 @@ export const EntryProvider = ({ children }) => {
             if (entry.userRecordId) {
                 try {
                     const record = await getTeammateRecord(entry.userRecordId);
-                    console.log(record.fields)
+                    // console.log(record.fields)
                     let photoRecord = record.fields.Photo[0]?.url;
                     let userNameRecord = record.fields["Full Name"];
                     let dayAmountRecord = record.fields["Today (Sum)"]
@@ -56,11 +57,39 @@ export const EntryProvider = ({ children }) => {
                 }
             }
         }
+        const getJobCodes = async () => {
+            try {
+                const jobRecordAndIdsObj = await getProductNameAndID()
+                // console.log(jobRecordAndIdsObj)
+                const jobCodes = Object.keys(jobRecordAndIdsObj);
+                const jobCodeRecordIds = { ...jobRecordAndIdsObj };
+        
+                setEntry(prevEntry => ({
+                    ...prevEntry,
+                    jobCodeArr: jobCodes, 
+                    jobCodeRecordIdArr: jobCodeRecordIds 
+                }));
+                
+            } catch (error) {
+                console.error("Failed to fetch jobcodes:", error);
+            }
+        }
+
         getTeammateInfo();
+        getJobCodes()
     }, [entry.userRecordId])
 
+    const updateStartDate = (index, newDate) => {
+        const updatedDates = [...entry.startDateArr];
+        updatedDates[index] = newDate;
+        setEntry(prev => ({ ...prev, startDateArr: updatedDates }));
+    };
+
     return (
-        <EntryContext.Provider value={{ entry, setEntry }}>
+        <EntryContext.Provider value={{ 
+            entry, setEntry,
+            updateStartDate,
+            }}>
             {children}
         </EntryContext.Provider>
     )

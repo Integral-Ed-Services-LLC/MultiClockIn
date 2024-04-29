@@ -1,0 +1,51 @@
+.jobcodes-outer-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* position: fixed; */
+    width: 344px;
+    height: 23px;
+    top: 330px;
+    left: 313px;
+  }
+  
+  .jobcodes-inner-div {
+    width: 43.39px;
+    top: 330px;
+    left: 313px;
+    display: flex;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 13.31px;
+    color: hsl(0, 0%, 0%);
+    /* padding-right: 25px; */
+  }
+  
+  .required-star {
+    color: red;
+    /* position: fixed; */
+    /* top: 330px;
+    left: 346px; */
+    /* margin-right: 3rem; */
+    margin-left: 3px;
+  }
+  
+  .jobcodes-dropdown {
+    position: relative;
+    width: 192.14px;
+    height: 22px;
+    /* top: 323px; */
+    left: -8px;
+    color: black;
+    background-color: hsl(0, 0%, 76.86%);
+    font-size: 9px;
+    line-height: 10.89px;
+    text-align: center;
+  }
+  
+  .placeholder-option{
+    font-size: 9px;
+    line-height: 10.89px;
+  }
+  

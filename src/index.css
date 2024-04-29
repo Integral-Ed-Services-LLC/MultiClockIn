@@ -4,12 +4,17 @@
   font-weight: 400;
 
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --white: hsl(0,0%,100%);
+  --light-grey: hsl(0, 0%, 92.2%);
+  --dark-grey: hsl(216.9, 19.1%, 26.7%);
+  --green: hsl(95.7, 61.5%, 41.8%);
+  --black: hsl(0, 0%, 0%);
 }
 
 a {
@@ -23,7 +28,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
+  position: relative;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;

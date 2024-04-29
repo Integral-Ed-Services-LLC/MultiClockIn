@@ -5,7 +5,6 @@ import { useEntry } from '../../utils/EntryProvider';
 
 export default function NavBar() {
     const { entry } = useEntry();
-    const [loading, setLoading] = useState(true);
 
     return (
         <div className='navbar-outer-div'>
