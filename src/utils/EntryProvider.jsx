@@ -8,7 +8,8 @@ export function useEntry() {
 
 export const EntryProvider = ({ children }) => {
     const params = new URLSearchParams(window.location.search);
-    const initialUserRecordId = params.get('userRecordId');
+    const initialUserRecordId = params.get('userRecordID') 
+    // || "recMhLRHRvxzjIHpn";
     const [entry, setEntry] = useState({
         userName: "",
         userRecordId: initialUserRecordId,
@@ -36,6 +37,7 @@ export const EntryProvider = ({ children }) => {
             if (entry.userRecordId) {
                 try {
                     const record = await getTeammateRecord(entry.userRecordId);
+                    console.log(record.fields)
                     let photoRecord = record.fields.Photo[0]?.url;
                     let userNameRecord = record.fields["Full Name"];
                     let dayAmountRecord = record.fields["Today (Sum)"]
