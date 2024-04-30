@@ -8,7 +8,7 @@
     position: absolute;
     display: flex;
     background-color: var(--white);
-    /* justify-content: space-evenly; */
+    justify-content: space-evenly;
 }
 
 .table-header-row{
@@ -37,6 +37,6 @@
     padding-bottom: 10px;
     display: flex;
     width: 80vw;
-    /* justify-content: space-evenly; */
+    justify-content: space-evenly;
 }
 

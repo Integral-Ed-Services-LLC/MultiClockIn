@@ -2,6 +2,8 @@ import './table-entries.css'
 import { useEntry } from '../../utils/EntryProvider'
 import DateInput from '../DateInput/DateInput'
 import JobCodeDropDown from '../JobCodeDropDown/JobCodeDropDown'
+import DurationField from '../DurationField/DurationField'
+import NotesInput from '../NotesInput/NotesInput'
 
 export default function TableEntries() {
     const { entry } = useEntry()
@@ -23,9 +25,9 @@ export default function TableEntries() {
                     {rowsArray.map((rowId) =>(
                         <tr className="entry-row" key={rowId}>
                             <td><DateInput id={rowId} /></td>
-                            <td> <JobCodeDropDown id={rowId} /></td>
-                            <td></td>
-                            <td></td>
+                            <td><JobCodeDropDown id={rowId} /></td>
+                            <td><DurationField id={rowId} /></td>
+                            <td><NotesInput id={rowId} /></td>
                         </tr>
                     ))}
                 </tbody>

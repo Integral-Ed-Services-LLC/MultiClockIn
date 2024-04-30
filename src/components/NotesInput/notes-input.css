@@ -1,0 +1,40 @@
+.notes-outer-div {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .notes-inner-div {
+    /* position: fixed; */
+    height: 23px;
+    top: 389px;
+    left: 313px;
+    display: flex;
+    justify-content: space-around;
+    align-items: baseline;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 13.31px;
+    color: hsl(0, 0%, 0%);
+  
+  }
+  
+  .notes-required-star {
+    /* position: fixed; */
+    top: 389px;
+    left: 348px;
+    color: red;
+  }
+  
+  .notes-field {
+    color: hsl(0, 0%, 0%);
+    /* position: fixed; */
+    top: 389px;
+    left: 363.62px;
+    /* width: 308.98px; */
+    height: 57px;
+    margin-left: 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+  }
+  
