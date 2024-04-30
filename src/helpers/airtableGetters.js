@@ -24,12 +24,12 @@ export function getProductNameAndID() {
   return new Promise((resolve, reject) => {
     const productNamesWithIds = {};
 
-    base("Project_Product_JobCode3")
-      .select({ view: "Grid view" })
+    base("Projects_Active")
+      .select({ view: "Active_Projects" })
       .eachPage(
         function page(records, fetchNextPage) {
           records.forEach((record) => {
-            productNamesWithIds[record.get("Product_Name")] = record.id;
+            productNamesWithIds[record.get("ClientAbbrev_Project_Link")] = record.id;
           });
           fetchNextPage();
         },

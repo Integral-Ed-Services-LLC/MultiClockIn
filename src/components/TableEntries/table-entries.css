@@ -22,13 +22,12 @@
 .table-body{
     position: absolute;
     display: flex;
-    height: 75vh;
+    /* height: 75vh; */
     flex-direction: column;
     justify-content: flex-start;
     top: 32px;
     left: 80px;
     border: 3px outset var(--light-grey);
-    border-right: none;
     padding-left: 2px;
 }
 

@@ -29,7 +29,7 @@ export const EntryProvider = ({ children }) => {
         showConfirmModal: false,
         showErrorModal: false,
         handleModalClose: false,
-        entryRows: 3,
+        entryRows: 10,
         submittedRecordIdArr: []
     })
 
@@ -91,6 +91,10 @@ export const EntryProvider = ({ children }) => {
             recordId: entry.jobCodeRecordIdArr[jobCodeName]
         };
         setEntry(prev => ({ ...prev, jobCodeArr: updatedJobCodes }));
+    }
+
+    const updateDurations = (index, newDuration) => {
+        
     }
 
     return (

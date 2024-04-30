@@ -4,6 +4,7 @@ import DateInput from '../DateInput/DateInput'
 import JobCodeDropDown from '../JobCodeDropDown/JobCodeDropDown'
 import DurationField from '../DurationField/DurationField'
 import NotesInput from '../NotesInput/NotesInput'
+import SubmitButton from '../SubmitButton/SubmitButton'
 
 export default function TableEntries() {
     const { entry } = useEntry()
@@ -30,6 +31,7 @@ export default function TableEntries() {
                             <td><NotesInput id={rowId} /></td>
                         </tr>
                     ))}
+                    <tr><SubmitButton /></tr>
                 </tbody>
             </table>
         </div>
