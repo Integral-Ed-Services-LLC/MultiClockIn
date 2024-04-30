@@ -94,14 +94,24 @@ export const EntryProvider = ({ children }) => {
     }
 
     const updateDurations = (index, newDuration) => {
-        
+        const updatedDurations = [...entry.durationArr];
+        updatedDurations[index] = newDuration;
+        setEntry(prev => ({ ...prev, durationArr: updatedDurations }));
+    }
+
+    const updateNotesInput = (index, newNote) => {
+        const updatedNotes = [...entry.notesArr];
+        updatedNotes[index] = newNote;
+        setEntry(prev => ({ ...prev, notesArr: updatedNotes}))
     }
 
     return (
         <EntryContext.Provider value={{ 
             entry, setEntry,
             updateStartDate,
-            updateJobCodes
+            updateJobCodes, 
+            updateDurations, 
+            updateNotesInput
             }}>
             {children}
         </EntryContext.Provider>

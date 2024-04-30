@@ -16,8 +16,8 @@ export function createMultiEntries(
           Team_Member: [userRecordId],
           Start_Time_Manual: `${startDateArr[i]}T06:59:00.000Z`,
           Projects_Active: [jobCodeArr[i].recordId],
-        //   Timesheet_Duration_Minutes: durationArr[i],
-        //   Notes: notesArr[i],
+          Timesheet_Duration_Minutes: Number(durationArr[i]),
+          Notes: notesArr[i],
         },
       }], function(err, records) {
         if (err) {
