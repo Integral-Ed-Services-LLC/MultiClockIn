@@ -60,13 +60,12 @@ export const EntryProvider = ({ children }) => {
         const getJobCodes = async () => {
             try {
                 const jobRecordAndIdsObj = await getProductNameAndID()
-                // console.log(jobRecordAndIdsObj)
                 const jobCodes = Object.keys(jobRecordAndIdsObj);
                 const jobCodeRecordIds = { ...jobRecordAndIdsObj };
         
                 setEntry(prevEntry => ({
                     ...prevEntry,
-                    jobCodeArr: jobCodes, 
+                    // jobCodeArr: jobCodes, 
                     jobCodeRecordIdArr: jobCodeRecordIds 
                 }));
                 
@@ -85,10 +84,20 @@ export const EntryProvider = ({ children }) => {
         setEntry(prev => ({ ...prev, startDateArr: updatedDates }));
     };
 
+    const updateJobCodes = (index, jobCodeName) => {
+        const updatedJobCodes = [...entry.jobCodeArr];
+        updatedJobCodes[index] = {
+            jobCode: jobCodeName,
+            recordId: entry.jobCodeRecordIdArr[jobCodeName]
+        };
+        setEntry(prev => ({ ...prev, jobCodeArr: updatedJobCodes }));
+    }
+
     return (
         <EntryContext.Provider value={{ 
             entry, setEntry,
             updateStartDate,
+            updateJobCodes
             }}>
             {children}
         </EntryContext.Provider>
