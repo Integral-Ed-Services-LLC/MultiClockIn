@@ -3,14 +3,15 @@ import { useEntry } from '../../utils/EntryProvider';
 import { createMultiEntries } from '../../helpers/airtablePost'
 
 export default function SubmitButton() {
-    const { entry } = useEntry()
+    const { entry, displayConfirmModal } = useEntry()
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("handlesubmit");
+        // console.log("handlesubmit");
         createMultiEntries(entry, entry.startDateArr, entry.jobCodeArr, entry.durationArr, entry.notesArr)
             .then(recordIds => {
                 console.log("Entries submitted successfully", recordIds);
+                displayConfirmModal()
                 // show Modal confirmation
             })
             .catch(err => {
@@ -20,7 +21,7 @@ export default function SubmitButton() {
     };
 
     return(
-        <div className="button-outer-div">
+        <td className="button-outer-div">
         <button
             type="button"
             onClick={handleSubmit} 
@@ -29,6 +30,6 @@ export default function SubmitButton() {
             SUBMIT ENTRIES
         </button>
 
-    </div>
+    </td>
     )
 }

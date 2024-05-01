@@ -29,7 +29,7 @@ export const EntryProvider = ({ children }) => {
         showConfirmModal: false,
         showErrorModal: false,
         handleModalClose: false,
-        entryRows: 10,
+        entryRows: 1,
         submittedRecordIdArr: []
     })
 
@@ -105,13 +105,19 @@ export const EntryProvider = ({ children }) => {
         setEntry(prev => ({ ...prev, notesArr: updatedNotes}))
     }
 
+    const displayConfirmModal = () => {
+        setEntry(prev => ({ ...prev, showConfirmModal: true}))
+        return true
+    }
+
     return (
         <EntryContext.Provider value={{ 
             entry, setEntry,
             updateStartDate,
             updateJobCodes, 
             updateDurations, 
-            updateNotesInput
+            updateNotesInput,
+            displayConfirmModal
             }}>
             {children}
         </EntryContext.Provider>

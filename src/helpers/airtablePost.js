@@ -5,9 +5,7 @@ const timeSheetHoursBase = "apps7roRhnziLR2ou";
 
 let base = new Airtable({ apiKey: `${apiKey}` }).base(`${timeSheetHoursBase}`);
 
-export function createMultiEntries(
-  entry
-) {
+export function createMultiEntries(entry) {
     const { userRecordId, entryRows, startDateArr, jobCodeArr, durationArr, notesArr } = entry;
   return Promise.all(Array.from({ length: entryRows }).map((val, i) => {
     return new Promise((resolve, reject) => {

@@ -4,16 +4,17 @@ import { EntryProvider } from './utils/EntryProvider'
 import NavBar from './components/NavBar/NavBar'
 import Header from './components/Header/Header'
 import TableEntries from './components/TableEntries/TableEntries'
-import SubmitButton from './components/SubmitButton/SubmitButton'
+import ConfirmModal from './components/ConfirmModal/ConfirmModal'
 
 function App() {
 
   return (
     <>
       <EntryProvider >
-          <NavBar />
-          <Header />
-        <div className="outer-container">
+        <ConfirmModal />
+        <NavBar />
+        <Header />
+        <div className="inner-container">
           <TableEntries />
           {/* <SubmitButton /> */}
         </div>
