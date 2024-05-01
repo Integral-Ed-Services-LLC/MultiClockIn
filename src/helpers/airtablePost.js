@@ -12,7 +12,7 @@ export function createMultiEntries(entry) {
         startDate: startDateArr[i] || "1980-01-01",
         jobCode: jobCodeArr[i]?.recordId || "recIqSwADvMHWL0c5",  //error -check other fields
         duration: Number(durationArr[i]) || 0,  
-        notes: notesArr[i] || "No Notes"
+        notes: notesArr[i] || "Error in Entry"
       }
     })
     return Promise.all(formattedEntries.map(entry => {
