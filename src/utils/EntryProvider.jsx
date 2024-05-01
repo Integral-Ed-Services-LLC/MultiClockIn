@@ -29,7 +29,7 @@ export const EntryProvider = ({ children }) => {
         showConfirmModal: false,
         showErrorModal: false,
         handleModalClose: false,
-        entryRows: 1,
+        entryRows: 10,
         submittedRecordIdArr: []
     })
 

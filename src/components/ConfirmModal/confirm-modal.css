@@ -1,5 +1,6 @@
 .modal-outer-div{
     position: relative;
+    top:20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -10,7 +11,7 @@
 
 .modal-inner-div{
     width: 80vw;
-    height: 80vh;
+    /* height: 80vh; */
     background-color: var(--black);
 
 }
@@ -21,7 +22,7 @@
 
 .modal-row{
     display: flex;
-    position: absolute;
+    /* position: absolute; */
     flex-direction: column;
     justify-content: space-evenly;
     width: 80vw;

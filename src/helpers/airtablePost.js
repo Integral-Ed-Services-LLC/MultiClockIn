@@ -7,25 +7,32 @@ let base = new Airtable({ apiKey: `${apiKey}` }).base(`${timeSheetHoursBase}`);
 
 export function createMultiEntries(entry) {
     const { userRecordId, entryRows, startDateArr, jobCodeArr, durationArr, notesArr } = entry;
-  return Promise.all(Array.from({ length: entryRows }).map((val, i) => {
-    return new Promise((resolve, reject) => {
-      base("Testing_Timesheet_Hours").create([{
-        fields: {
-          Team_Member: [userRecordId],
-          Start_Time_Manual: `${startDateArr[i]}T06:59:00.000Z`,
-          Projects_Active: [jobCodeArr[i].recordId],
-          Timesheet_Duration_Minutes: Number(durationArr[i]),
-          Notes: notesArr[i],
-        },
-      }], function(err, records) {
-        if (err) {
-          console.error(err);
-          reject(err);
-        } else if (records && records.length > 0) {
-          resolve(records[0].getId());
-        }
+    const formattedEntries = Array.from({length: entryRows }).map((_, i) => {
+      return {
+        startDate: startDateArr[i] || "1980-01-01",
+        jobCode: jobCodeArr[i]?.recordId || "recIqSwADvMHWL0c5",  //error -check other fields
+        duration: Number(durationArr[i]) || 0,  
+        notes: notesArr[i] || "No Notes"
+      }
+    })
+    return Promise.all(formattedEntries.map(entry => {
+      return new Promise((resolve, reject) => {
+          base("Testing_Timesheet_Hours").create([{
+              fields: {
+                  Team_Member: [userRecordId],
+                  Start_Time_Manual: `${entry.startDate}T06:59:00.000Z`,
+                  Projects_Active: [entry.jobCode],
+                  Timesheet_Duration_Minutes: entry.duration,
+                  Notes: entry.notes,
+              },
+          }], function(err, records) {
+              if (err) {
+                  console.error(err);
+                  reject(err);
+              } else if (records && records.length > 0) {
+                  resolve(records[0].getId());
+              }
+          });
       });
-    });
-  })
-);
+  }));
 }
