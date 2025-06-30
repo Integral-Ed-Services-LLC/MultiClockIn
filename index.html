@@ -15,6 +15,18 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Open+Sans:wght@800&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Debug logging for user identification
+      console.log('[ClockIn] Script loaded, waiting for user identification message...');
+      window.addEventListener('message', (event) => {
+        console.log('[ClockIn] postMessage received:', event.data);
+        if (event.data && (event.data.email || event.data.firstName)) {
+          console.log('[ClockIn] User data found:', event.data);
+        } else {
+          console.warn('[ClockIn] No valid user data in message:', event.data);
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
