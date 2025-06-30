@@ -1,5 +1,65 @@
 import { TimesheetBase } from './airtable-base';
 
+export async function getTaskAndSprints(teamId) {
+  const team = await TimesheetBase('team').find(teamId);
+  const taskValues = team.get('task-ddl-timesheets') || [];
+
+  const parsedTasks = taskValues.map((value) => {
+    const [idPart, ...nameParts] = value.split(' - ');
+    return {
+      original: value,
+      taskId: idPart.trim(),
+      taskName: nameParts.join(' - ').trim()
+    };
+  });
+
+  const taskIdList = parsedTasks.map((t) => t.taskId);
+
+  const taskRecords = await TimesheetBase('tasks')
+    .select({
+      filterByFormula: `OR(${taskIdList.map((id) => `{Task_ID} = '${id}'`).join(',')})`
+    })
+    .all();
+
+  const taskIdToRecordId = {};
+  taskRecords.forEach((task) => {
+    const taskId = task.get('Task_ID');
+    if (taskId) {
+      taskIdToRecordId[taskId] = {
+        recordId: task.id,
+        billingCode: task.fields['billing-code']
+      };
+    }
+  });
+
+  const sprints = await TimesheetBase('sprints')
+    .select({ fields: ['tasks-linked'] })
+    .all();
+
+  const sprintsMap = {};
+
+  parsedTasks.forEach((parsed) => {
+    const { recordId } = taskIdToRecordId[parsed.taskId];
+    sprintsMap[recordId] = [];
+
+    if (recordId) {
+      for (const sprint of sprints) {
+        const linkedTasks = sprint.fields['tasks-linked'] || [];
+        if (linkedTasks.includes(recordId)) {
+          sprintsMap[recordId] = [sprint.id];
+          break;
+        }
+      }
+    }
+  });
+
+  return {
+    taskIdToRecordId,
+    parsedTasks,
+    sprintsMap
+  };
+}
+
 export async function getJobCodes(firstName) {
   const lowerName = firstName.toLowerCase();
 
@@ -65,11 +125,11 @@ export async function getJobCodes(firstName) {
 export function writeEntriesToTimesheet(entries, userId) {
   const cleanedEntries = entries.map((entry) => ({
     fields: {
-      'billing-code': [entry.jobCode],
+      'billing-code': entry.billingCode,
       Start_Time_Manual: entry.startTime,
       Notes: entry.notes,
       Team_Member: [userId],
-      'minutes-entered': parseInt(entry.minutesWorked, 10)
+      'minutes-entered': parseInt(entry.minutes, 10)
     }
   }));
 
@@ -82,4 +142,23 @@ export function writeEntriesToTimesheet(entries, userId) {
       resolve(records);
     });
   });
+}
+
+export async function findTeamMemberByFirstName(firstName) {
+  const result = await TimesheetBase('team')
+    .select({
+      filterByFormula: `{First Name} = '${firstName}'`,
+      maxRecords: 1
+    })
+    .firstPage();
+
+  if (result.length === 0) {
+    return null; // or throw new Error('User not found');
+  }
+
+  const user = result[0];
+  return {
+    id: user.id,
+    ...user.fields
+  };
 }

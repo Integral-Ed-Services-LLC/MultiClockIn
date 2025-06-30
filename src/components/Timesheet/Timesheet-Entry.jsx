@@ -2,113 +2,144 @@ import React, { useMemo, useState } from 'react';
 import classes from './Timesheet.module.css';
 
 function TimesheetEntry({
-  jobCodes,
-  arrayIndex,
-  value,
-  onCancelEntry,
-  onChangeEntry
+  index,
+  task,
+  jobCode,
+  sprintCode,
+  notes,
+  minutes,
+  done,
+  onFormValueChange,
+  onRemoveEntry,
+  tasksList
 }) {
-  function onChangeMinutes(val) {
-    onChangeEntry('minutesWorked', val, arrayIndex);
+  function onTaskChange(val) {
+    onFormValueChange(index, 'task', val);
   }
 
-  function onChangeStartTime(val) {
-    console.log(val);
-    onChangeEntry('startTime', val, arrayIndex);
+  function onJobCodeChange(val) {
+    onFormValueChange(index, 'jobCode', val);
   }
 
-  function onChangeNotes(val) {
-    onChangeEntry('notes', val, arrayIndex);
+  function onSprintCodeChange(val) {
+    onFormValueChange(index, 'sprintCode', val);
   }
 
-  function onChangeJobCode(val) {
-    console.log(val);
-    onChangeEntry('jobCode', val, arrayIndex);
+  function onNotesChange(val) {
+    onFormValueChange(index, 'notes', val);
   }
 
-  const hoursString = useMemo(() => {
-    const hrs = Math.floor(value.minutesWorked / 60);
-    const mins = value.minutesWorked % 60;
+  function onMinutesChange(val) {
+    onFormValueChange(index, 'minutes', val);
+    onFormValueChange(index, 'done', false);
+  }
 
-    const paddedHrs = String(hrs).padStart(2, '0');
-    const paddedMins = String(mins).padStart(2, '0');
+  function onDoneChange(val) {
+    onFormValueChange(index, 'done', val);
+  }
 
-    return `${paddedHrs}:${paddedMins}`;
-  }, [value.minutesWorked]);
+  const hoursAndMinutes = useMemo(() => {
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    const hrsPart = hrs > 0 ? `${hrs}hr${hrs > 1 ? 's' : ''}` : '';
+    const minsPart = mins > 0 ? `${mins}min${mins > 1 ? 's' : ''}` : '';
+
+    return [hrsPart, minsPart].filter(Boolean).join(' ');
+  }, [minutes]);
+
+  const selectableTasks = useMemo(() => {
+    return tasksList.map((val) => ({
+      id: val.taskId,
+      label: val.original
+    }));
+  }, [tasksList.length]);
 
   return (
     <div className={classes['timesheet-form']}>
-      <div
-        style={{
-          fontSize: 16,
-          fontWeight: 'bold'
-        }}
-      >
-        ({arrayIndex + 1}) Enter your time log:{' '}
+      <div className={classes['task-inputs']}>
+        <div className={classes['task-input-item']}>
+          <label className={classes['task-input-label']} htmlFor="task">
+            Task:
+          </label>
+          <select
+            className={classes['task-input']}
+            id="task"
+            name="task"
+            value={task}
+            onChange={(e) => onTaskChange(e.target.value)}
+          >
+            <option value="">-- Select Task --</option>
+            {selectableTasks.map((taskVal, index) => (
+              <option key={index} value={taskVal.id}>
+                {taskVal.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={classes['task-input-item']}>
+          <label className={classes['task-input-label']} htmlFor="jobCode">
+            Job Code:
+          </label>
+          <select
+            className={classes['task-input']}
+            id="jobCode"
+            name="jobCode"
+            value={jobCode}
+            onChange={(e) => onJobCodeChange(e.target.value)}
+            disabled={task}
+          >
+            <option value="">-- Select Job Code --</option>
+            <option value="job-code-1">Code 1</option>
+          </select>
+        </div>
+        <div className={classes['task-input-item']}>
+          <label className={classes['task-input-label']} htmlFor="sprintCode">
+            Sprint Code:
+          </label>
+          <select
+            className={classes['task-input']}
+            name="sprintCode"
+            id="sprintCode"
+            value={sprintCode}
+            onChange={(e) => onSprintCodeChange(e.target.value)}
+            disabled={task}
+          >
+            <option value="">-- Select Sprint Code --</option>
+            <option value="sprint-1">Sprint 1</option>
+          </select>
+        </div>
       </div>
-      <div className={classes['form-item']}>
-        <label htmlFor="jobCode">Job Code</label>
-        <select
-          id="jobCode"
-          name="jobCode"
-          type="select"
-          className={classes['timesheet-input']}
-          style={{ width: 300 }}
-          value={value.jobCode}
-          onChange={(e) => onChangeJobCode(e.target.value)}
-        >
-          <option value="">-- Select Code --</option>
-          {jobCodes.map((val) => (
-            <option key={val.id} value={val.id}>
-              {val.code}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className={classes['form-item']}>
-        <label htmlFor="startTime">Start Time</label>
-        <input
-          id="startTime"
-          name="startTime"
-          type="datetime-local"
-          className={classes['timesheet-input']}
-          value={value.startTime}
-          onChange={(e) => onChangeStartTime(e.target.value)}
-        />
-      </div>
-      <div className={classes['form-item']}>
-        <label htmlFor="minutesWorked" style={{ textAlign: 'center' }}>
-          Minutes Worked <br /> ({hoursString} Hours)
-        </label>
-        <input
-          id="minutesWorked"
-          name="minutesWorked"
-          type="number"
-          min={1}
-          value={value.minutesWorked}
-          className={classes['timesheet-input']}
-          onChange={(e) => onChangeMinutes(e.target.value)}
-        />
-      </div>
-      <div className={classes['form-item']}>
-        <label htmlFor="notes">Notes</label>
-        <input
-          id="notes"
-          name="notes"
+      <div className={classes['notes-input-item']}>
+        Notes:
+        <textarea
+          className={classes['notes-input']}
           type="text"
-          className={classes['timesheet-input']}
-          style={{
-            width: 500
-          }}
-          value={value.notes}
-          onChange={(e) => onChangeNotes(e.target.value)}
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
         />
       </div>
-      <div className={classes['form-item']}>
-        <button
-          className="btn-danger"
-          onClick={() => onCancelEntry(arrayIndex)}
-        >
+      <div className={classes['minutes-input-section']}>
+        <div className={classes['minutes-input-item']}>
+          <div>Minutes</div>
+          <input
+            className={classes['minutes-input']}
+            type="number"
+            min={1}
+            value={minutes}
+            onChange={(e) => onMinutesChange(e.target.value)}
+          />
+          <div>{hoursAndMinutes}</div>
+        </div>
+        <div className={classes['check-input-item']}>
+          <input
+            type="checkbox"
+            checked={done}
+            onChange={(e) => onDoneChange(e.target.checked)}
+          />
+          Done
+        </div>
+        <button className="btn-danger" onClick={() => onRemoveEntry(index)}>
           X Cancel
         </button>
       </div>
@@ -118,12 +149,11 @@ function TimesheetEntry({
 
 export default React.memo(TimesheetEntry, (prevProps, newProps) => {
   return (
-    prevProps.arrayIndex === newProps.arrayIndex &&
-    prevProps.value.jobCode === newProps.value.jobCode &&
-    prevProps.value.startTime === newProps.value.startTime &&
-    prevProps.value.notes === newProps.value.notes &&
-    prevProps.value.minutesWorked === newProps.value.minutesWorked &&
-    prevProps.value.minutesWorked === newProps.value.minutesWorked &&
-    prevProps.jobCodes.length === newProps.jobCodes.length
+    prevProps.done === newProps.done &&
+    prevProps.task === newProps.task &&
+    prevProps.project === newProps.project &&
+    prevProps.jobCode === newProps.jobCode &&
+    prevProps.notes === newProps.notes &&
+    prevProps.minutes === newProps.minutes
   );
 });

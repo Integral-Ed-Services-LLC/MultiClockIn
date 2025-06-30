@@ -1,139 +1,180 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import classes from './Timesheet.module.css';
+import classes from './TimesheetPage.module.css';
 import TimesheetEntry from '../../components/Timesheet/Timesheet-Entry';
-import { getJobCodes, writeEntriesToTimesheet } from '../../airtable/apis';
-
-const USER = {
-  'First Name': 'David',
-  'Last Name': 'Malbin'
-};
+import { writeEntriesToTimesheet } from '../../airtable/apis';
 
 const getUserName = (user) => user['First Name'] + ' ' + user['Last Name'];
 
-function TimesheetEntryTable() {
-  const [allBillingCodes, setAllBillingCodes] = useState([]);
-  const [userId, setUserId] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [timesheetEntries, setTimesheetEntries] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+function isValidEntry(entry) {
+  const notesFilled = entry.notes && entry.notes.trim() !== '';
+  const minutesValid = parseInt(entry.minutes, 10) > 0;
+  const doneIsTrue = entry.done === true;
 
-  useEffect(() => {
-    setIsLoading(true);
-    getJobCodes(USER['First Name'])
-      .then(({ airtableUserId, billingCodesList }) => {
-        setUserId(airtableUserId), setAllBillingCodes(billingCodesList);
-      })
-      .finally(() => {
-        setIsLoading(false);
+  const taskFilled = entry.task && entry.task.trim() !== '';
+  const jobSprintFilled = entry.jobCode && entry.sprintCode;
+
+  const condition1 = notesFilled && minutesValid && doneIsTrue;
+  const condition2 =
+    taskFilled || (jobSprintFilled && jobSprintFilled.trim() !== '');
+
+  return condition1 && condition2;
+}
+
+function TimesheetEntryTable({
+  user,
+  taskRecordsMap,
+  taskSprintMap,
+  tasksList
+}) {
+  const [timeEntries, setTimeEntries] = useState([]);
+  const [timeSheetDate, setTimesheetDate] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  function onAddTimeEntry() {
+    setTimeEntries((prevArr) => {
+      const newArray = prevArr.map((val) => ({ ...val }));
+      newArray.push({
+        jobCode: '',
+        task: '',
+        sprintCode: '',
+        notes: '',
+        minutes: 1,
+        done: false
       });
-  }, []);
-
-  function onAddTimesheetEntryForm() {
-    setTimesheetEntries((prevVal) => {
-      const previousArray = prevVal.map((val) => ({
-        jobCode: val.jobCode,
-        startTime: val.startTime,
-        minutesWorked: val.minutesWorked,
-        notes: val.notes
-      }));
-      const newArray = [
-        ...previousArray,
-        {
-          jobCode: '',
-          startTime: '',
-          minutesWorked: 1,
-          notes: ''
-        }
-      ];
       return newArray;
     });
   }
 
-  function onRemoveTimeSheetEntry(timesheetEntryIndex) {
-    setTimesheetEntries((prevVal) => {
-      return prevVal.filter((_, index) => index !== timesheetEntryIndex);
+  function onFormValueChange(index, key, value) {
+    setTimeEntries((prevArr) => {
+      const newArray = prevArr.map((val) => ({ ...val }));
+      newArray[index][key] = value;
+      return newArray;
     });
   }
 
-  function onChangeEntry(entryChangeKey, entryChangeValue, index) {
-    setTimesheetEntries((prevVal) => {
-      const newArr = prevVal.map((val) => ({
-        ...val
-      }));
-      newArr[index][entryChangeKey] = entryChangeValue;
-      return newArr;
+  function onRemoveEntry(index) {
+    setTimeEntries((prevArr) => {
+      const newArray = prevArr.map((val) => ({ ...val }));
+      return [...newArray.slice(0, index), ...newArray.slice(index + 1)];
     });
   }
 
-  async function onSubmitTimesheet() {
-    const allFilled = timesheetEntries.every((entry) => {
-      return (
-        entry.jobCode && entry.startTime && entry.minutesWorked && entry.notes
-      );
-    });
-    if (!allFilled) {
+  function findFinalValues(entry) {
+    const value = {
+      notes: entry.notes,
+      minutes: entry.minutes,
+      startTime: `${timeSheetDate}T00:00`
+    };
+    if (entry.task) {
+      value.billingCode = taskRecordsMap[entry.task].billingCode;
+      value.sprintCode = taskSprintMap[taskRecordsMap[entry.task].recordId];
+    }
+    return value;
+  }
+
+  async function onSubmit() {
+    const allValid = timeEntries.every(isValidEntry);
+    if (!allValid) {
       setErrorMessage(
-        'All fields are required. You have not filled a field in some timesheet entry.'
+        'You have not filled a field in some entry, or have not checked some entry as done'
       );
       return;
     }
-
-    setErrorMessage('');
-
+    setLoading(true);
+    const finalValues = timeEntries.map(findFinalValues);
     try {
-      setIsLoading(true);
-      await writeEntriesToTimesheet(timesheetEntries, userId);
-      alert('New entries added to the timesheet.');
+      await writeEntriesToTimesheet(finalValues, user.id);
+      alert('Timesheet entries pushed successfully!');
+      setTimeEntries([]);
+      setTimesheetDate('');
+      setErrorMessage(null);
     } catch (e) {
-      console.log(e);
-      setErrorMessage(
-        'Some error occurred in creating the entries. Try to re-enter them.'
-      );
+      setErrorMessage('Unknown Error Occurred!');
     } finally {
-      setIsLoading(false);
-      setTimesheetEntries([]);
+      setLoading(false);
     }
   }
 
+  const minutesProgress = timeEntries.reduce(
+    (sum, item) => (item.done ? sum + parseInt(item.minutes, 10) : sum),
+    0
+  );
+
   return (
     <div className={classes['timesheet-table-container']}>
-      <h3>Multiple Timesheet Entries Table for {getUserName(USER)}</h3>
-      {isLoading ? (
+      <h3>Timesheet Entries for {getUserName(user)}</h3>
+      {loading ? (
         'Loading...'
       ) : (
         <>
+          <div className={classes['time-progress-div']}>
+            <div className={classes['time-progress-bar']}>
+              <div
+                className={classes['minutes-progress']}
+                style={{
+                  width: Math.min(minutesProgress, 480) * 3
+                }}
+              >
+                {minutesProgress >= 25
+                  ? `${minutesProgress > 480 ? '480+' : minutesProgress}mins`
+                  : ''}
+              </div>
+            </div>
+            <div className={classes['time-labels']}>
+              <div>0m</div>
+              <div>80m</div>
+              <div>160m</div>
+              <div>240m</div>
+              <div>320m</div>
+              <div>400m</div>
+              <div>480m</div>
+            </div>
+          </div>
+          <div>
+            Select Date:{' '}
+            <input
+              type="date"
+              className={classes['date-time-input']}
+              value={timeSheetDate}
+              onChange={(e) => setTimesheetDate(e.target.value)}
+            />
+          </div>
           <button
             className={'btn-primary' + ' ' + classes['add-timesheet-btn']}
-            onClick={onAddTimesheetEntryForm}
+            style={
+              !timeSheetDate
+                ? { backgroundColor: '#0000ff75', cursor: 'not-allowed' }
+                : {}
+            }
+            onClick={onAddTimeEntry}
+            disabled={!timeSheetDate}
           >
-            Add New Timesheet Entry to the Table
+            Add Timesheet Entry
           </button>
-          {errorMessage ? (
-            <div style={{ color: 'red', fontWeight: 'bold' }}>
-              Error: {errorMessage}
-            </div>
-          ) : (
-            ''
-          )}
-          {timesheetEntries.map((entry, index) => (
+          <div style={{ color: 'red' }}>{errorMessage}</div>
+          {timeEntries.map((entry, index) => (
             <TimesheetEntry
               key={index}
-              value={entry}
-              arrayIndex={index}
-              jobCodes={allBillingCodes}
-              onCancelEntry={onRemoveTimeSheetEntry}
-              onChangeEntry={onChangeEntry}
+              index={index}
+              jobCode={entry.jobCode}
+              task={entry.task}
+              sprintCode={entry.sprintCode}
+              notes={entry.notes}
+              done={entry.done}
+              minutes={entry.minutes}
+              tasksList={tasksList}
+              onFormValueChange={onFormValueChange}
+              onRemoveEntry={onRemoveEntry}
             />
           ))}
-          {timesheetEntries.length > 0 ? (
+          {timeEntries.length > 0 ? (
             <button
+              style={{ width: '81%', marginTop: 10, marginLeft: 3 }}
               className="btn-success"
-              style={{
-                width: 200,
-                marginTop: 10
-              }}
-              onClick={onSubmitTimesheet}
+              onClick={onSubmit}
             >
               Submit Entries
             </button>
