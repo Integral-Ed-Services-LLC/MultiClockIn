@@ -60,66 +60,77 @@ export async function getTaskAndSprints(teamId) {
   };
 }
 
-export async function getJobCodes(firstName) {
-  const lowerName = firstName.toLowerCase();
+export async function getBillingCodes(teamId) {
+  const user = await TimesheetBase('team').find(teamId);
+  const billingCodeUnCleaned = user.get('billing-codes-timesheet-ddl') || [];
+  const billingCodeValues =
+    billingCodeUnCleaned.length > 0 ? billingCodeUnCleaned[0].split(';') : [];
 
-  return new Promise((resolve, reject) => {
-    TimesheetBase('team')
-      .select({
-        filterByFormula: `SEARCH("${lowerName}", LOWER({First Name}))`,
-        maxRecords: 1
-      })
-      .firstPage(async (err, records) => {
-        if (err) return reject(err);
-        if (records.length === 0) return resolve([]);
+  if (billingCodeValues.length === 0) {
+    return {
+      billingCodes: [],
+      sprintMap: {}
+    };
+  }
 
-        const userRecord = records[0];
-        const taskIds = userRecord.fields['Tasks_Assigned'] || [];
+  const billingCodeFilter = `OR(${billingCodeValues.map((v) => `{billing-code} = "${v}"`).join(',')})`;
 
-        if (taskIds.length === 0) return resolve([]);
+  const billingCodeRecords = await TimesheetBase('billing-codes')
+    .select({
+      filterByFormula: billingCodeFilter,
+      fields: ['billing-code', 'projects-link']
+    })
+    .all();
 
-        // Step 2: Fetch all Tasks
-        TimesheetBase('tasks')
-          .select({
-            filterByFormula: `OR(${taskIds.map((id) => `RECORD_ID() = '${id}'`).join(',')})`
-          })
-          .firstPage(async (err2, taskRecords) => {
-            if (err2) return reject(err2);
+  const billingCodeToRecordsMap = {};
 
-            // Step 3: Collect all billing-code IDs
-            const billingCodeIds = taskRecords
-              .map((task) => task.fields['billing-code'])
-              .flat()
-              .filter(Boolean);
-
-            // Remove duplicates
-            const uniqueBillingCodeIds = [...new Set(billingCodeIds)];
-
-            if (uniqueBillingCodeIds.length === 0) return resolve([]);
-
-            // Step 4: Fetch billing code records
-            TimesheetBase('billing-codes')
-              .select({
-                fields: ['billing-code'],
-                filterByFormula: `AND(
-                  OR(${uniqueBillingCodeIds.map((id) => `RECORD_ID() = '${id}'`).join(',')}),
-                  NOT(Status = "Inactive"),
-                  NOT(Status = "Complete and Closed")
-                )`
-              })
-              .firstPage((err3, billingRecords) => {
-                if (err3) return reject(err3);
-
-                // Return list of billing code records
-                const billingCodesList = billingRecords.map((billingCode) => ({
-                  id: billingCode.id,
-                  code: billingCode.fields['billing-code']
-                }));
-                resolve({ airtableUserId: userRecord.id, billingCodesList });
-              });
-          });
-      });
+  const billingCodeMap = {};
+  billingCodeRecords.forEach((record) => {
+    const code = record.get('billing-code');
+    billingCodeToRecordsMap[code] = record.id;
+    const projectId = (record.get('projects-linked') || [])[0]; // single value
+    if (code && projectId) {
+      billingCodeMap[code] = projectId;
+    }
   });
+
+  // // Step 3: Get all relevant project IDs
+  const projectIds = [...new Set(Object.values(billingCodeMap))];
+
+  const sprintFilter = `OR(${projectIds.map((id) => `{project-link} = '${id}'`).join(',')})`;
+
+  const sprints = await TimesheetBase('sprints')
+    .select({
+      filterByFormula: sprintFilter,
+      fields: ['sprint-code', 'project-link']
+    })
+    .all();
+
+  // Step 5: Build sprint map: billing-code → list of { sprintId, sprintCode }
+  const sprintMap = {}; // billing-code → array of sprints
+  billingCodeValues.forEach((code) => (sprintMap[code] = []));
+
+  sprints.forEach((sprint) => {
+    const sprintProjectId = (sprint.get('project-link') || [])[0];
+    const sprintCode = sprint.get('sprint-code');
+    const sprintId = sprint.id;
+
+    // Match each billing-code string that links to this project
+    Object.entries(billingCodeMap).forEach(([code, projectId]) => {
+      if (projectId === sprintProjectId) {
+        sprintMap[code].push({
+          sprintId,
+          sprintCode
+        });
+      }
+    });
+  });
+
+  return {
+    billingCodes: billingCodeValues,
+    billingCodeToRecordsMap,
+    sprintMap
+  };
 }
 
 export function writeEntriesToTimesheet(entries, userId) {
