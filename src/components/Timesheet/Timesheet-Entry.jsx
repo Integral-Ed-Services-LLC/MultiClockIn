@@ -11,7 +11,9 @@ function TimesheetEntry({
   done,
   onFormValueChange,
   onRemoveEntry,
-  tasksList
+  tasksList,
+  billingCodesList,
+  billingCodesSprints
 }) {
   function onTaskChange(val) {
     onFormValueChange(index, 'task', val);
@@ -55,6 +57,21 @@ function TimesheetEntry({
     }));
   }, [tasksList.length]);
 
+  const selectableBillingCodes = useMemo(() => {
+    return billingCodesList.map((val) => ({
+      id: val,
+      label: val
+    }));
+  }, [billingCodesList.length]);
+
+  const selectableSprintCodes = useMemo(() => {
+    if (!jobCode) return [];
+    return billingCodesSprints[jobCode].map((val) => ({
+      id: val.sprintId,
+      label: val.sprintCode
+    }));
+  }, [jobCode]);
+
   return (
     <div className={classes['timesheet-form']}>
       <div className={classes['task-inputs']}>
@@ -69,7 +86,11 @@ function TimesheetEntry({
             value={task}
             onChange={(e) => onTaskChange(e.target.value)}
           >
-            <option value="">-- Select Task --</option>
+            <option value="">
+              {selectableTasks.length > 0
+                ? '-- Select Task --'
+                : 'No Available Task'}
+            </option>
             {selectableTasks.map((taskVal, index) => (
               <option key={index} value={taskVal.id}>
                 {taskVal.label}
@@ -89,8 +110,16 @@ function TimesheetEntry({
             onChange={(e) => onJobCodeChange(e.target.value)}
             disabled={task}
           >
-            <option value="">-- Select Job Code --</option>
-            <option value="job-code-1">Code 1</option>
+            <option value="">
+              {selectableTasks.length > 0
+                ? '-- Select Job Code --'
+                : 'No Available Job Code'}
+            </option>
+            {selectableBillingCodes.map((billingCode, index) => (
+              <option key={index} value={billingCode.id}>
+                {billingCode.label}
+              </option>
+            ))}
           </select>
         </div>
         <div className={classes['task-input-item']}>
@@ -105,8 +134,16 @@ function TimesheetEntry({
             onChange={(e) => onSprintCodeChange(e.target.value)}
             disabled={task}
           >
-            <option value="">-- Select Sprint Code --</option>
-            <option value="sprint-1">Sprint 1</option>
+            <option value="">
+              {selectableSprintCodes.length > 0
+                ? '-- Select Job Code --'
+                : 'No Available Sprint Code'}
+            </option>
+            {selectableSprintCodes.map((sprintCode, index) => (
+              <option key={index} value={sprintCode.id}>
+                {sprintCode.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

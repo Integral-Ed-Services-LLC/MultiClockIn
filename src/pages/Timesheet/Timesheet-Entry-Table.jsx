@@ -12,11 +12,10 @@ function isValidEntry(entry) {
   const doneIsTrue = entry.done === true;
 
   const taskFilled = entry.task && entry.task.trim() !== '';
-  const jobSprintFilled = entry.jobCode && entry.sprintCode;
+  const jobCodeFilled = entry.jobCode.trim() !== '';
 
   const condition1 = notesFilled && minutesValid && doneIsTrue;
-  const condition2 =
-    taskFilled || (jobSprintFilled && jobSprintFilled.trim() !== '');
+  const condition2 = taskFilled || jobCodeFilled;
 
   return condition1 && condition2;
 }
@@ -25,7 +24,10 @@ function TimesheetEntryTable({
   user,
   taskRecordsMap,
   taskSprintMap,
-  tasksList
+  tasksList,
+  billingCodesList,
+  billingCodesMap,
+  billingCodesSprints
 }) {
   const [timeEntries, setTimeEntries] = useState([]);
   const [timeSheetDate, setTimesheetDate] = useState('');
@@ -71,6 +73,9 @@ function TimesheetEntryTable({
     if (entry.task) {
       value.billingCode = taskRecordsMap[entry.task].billingCode;
       value.sprintCode = taskSprintMap[taskRecordsMap[entry.task].recordId];
+    } else if (entry.jobCode) {
+      value.billingCode = [billingCodesMap[entry.jobCode]];
+      value.sprintCode = entry.sprintCode;
     }
     return value;
   }
@@ -166,6 +171,8 @@ function TimesheetEntryTable({
               done={entry.done}
               minutes={entry.minutes}
               tasksList={tasksList}
+              billingCodesList={billingCodesList}
+              billingCodesSprints={billingCodesSprints}
               onFormValueChange={onFormValueChange}
               onRemoveEntry={onRemoveEntry}
             />
