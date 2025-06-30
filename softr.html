@@ -8,31 +8,43 @@
         body { font-family: Arial, sans-serif; }
         .loading-message { text-align: center; margin-top: 40px; font-size: 1.2em; color: #666; }
         iframe { width: 100%; height: 600px; border: none; }
+        .debug { margin: 1em 0; color: #444; font-size: 1.1em; }
     </style>
 </head>
 <body>
 <div id="embed-container">
     <div class="loading-message" id="loading-msg">Waiting for user info...</div>
+    <div class="debug" id="debug-info"></div>
 </div>
-<iframe
-  id="clockin-iframe"
-  src="https://integraled.github.io/MultiClockIn/"
-  width="100%"
-  height="600"
-  style="border:none;"
-></iframe>
 <script>
-window.addEventListener('DOMContentLoaded', function() {
-    var iframe = document.getElementById('clockin-iframe');
-    // Softr will replace these with the actual logged-in user's info
-    var userData = {
-        email: '{LOGGED_IN_USER:EMAIL}',
-        firstName: '{LOGGED_IN_USER:First_Name}'
-    };
-    iframe.onload = function() {
-        iframe.contentWindow.postMessage(userData, '*');
-    };
-});
+console.log('[SoftrEmbed] Script loaded, looking for window.logged_in_user...');
+console.log('[SoftrEmbed] window.logged_in_user:', window.logged_in_user);
+
+(function() {
+    // Try to get the most useful user fields
+    var user = window.logged_in_user || {};
+    var email = user.softr_user_email || user.email || user.EMail || '';
+    var name = user.softr_user_full_name || user.name || user.first_name || '';
+    console.log('[SoftrEmbed] Found email:', email, 'name:', name);
+
+    document.getElementById('debug-info').innerText =
+        `Sending to iframe: email: ${email || '(none)'} | name: ${name || '(none)'}`;
+
+    if (email || name) {
+        document.getElementById('loading-msg').remove();
+        var iframe = document.createElement('iframe');
+        iframe.id = 'clockin-iframe';
+        iframe.src = 'https://integraled.github.io/MultiClockIn/';
+        document.getElementById('embed-container').appendChild(iframe);
+        iframe.onload = function() {
+            console.log('[SoftrEmbed] Sending postMessage to iframe:', { email, name });
+            iframe.contentWindow.postMessage({ email, name }, '*');
+        };
+    } else {
+        document.getElementById('loading-msg').innerText = 'User info not available.';
+        console.warn('[SoftrEmbed] No email or name available to send to iframe.');
+    }
+})();
 </script>
 </body>
 </html>
