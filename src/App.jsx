@@ -39,6 +39,19 @@ function App() {
     loadInitialData();
   }, []);
 
+  useEffect(() => {
+    function handleUserMessage(event) {
+      if (event.data && (event.data.email || event.data.firstName)) {
+        // Use event.data.email or event.data.firstName to fetch user from Airtable
+        // Example: findTeamMemberByEmail(event.data.email)
+        // or: findTeamMemberByFirstName(event.data.firstName)
+        // Then setUser(...) and load the rest of the app
+      }
+    }
+    window.addEventListener('message', handleUserMessage);
+    return () => window.removeEventListener('message', handleUserMessage);
+  }, []);
+
   return !initialized ? (
     'Initializing the App...'
   ) : (

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed MultiClockIn in Softr</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .loading-message { text-align: center; margin-top: 40px; font-size: 1.2em; color: #666; }
+        iframe { width: 100%; height: 600px; border: none; }
+    </style>
+</head>
+<body>
+<div id="embed-container">
+    <div class="loading-message" id="loading-msg">Waiting for user info...</div>
+</div>
+<iframe
+  id="clockin-iframe"
+  src="https://integraled.github.io/MultiClockIn/"
+  width="100%"
+  height="600"
+  style="border:none;"
+></iframe>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    var iframe = document.getElementById('clockin-iframe');
+    // Softr will replace these with the actual logged-in user's info
+    var userData = {
+        email: '{LOGGED_IN_USER:EMAIL}',
+        firstName: '{LOGGED_IN_USER:First_Name}'
+    };
+    iframe.onload = function() {
+        iframe.contentWindow.postMessage(userData, '*');
+    };
+});
+</script>
+</body>
+</html>
