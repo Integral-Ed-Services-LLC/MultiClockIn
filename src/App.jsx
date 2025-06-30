@@ -8,7 +8,7 @@ import {
 
 const USER_FIRST_NAME = 'David';
 
-function App() {
+function App({ userData }) {
   const [user, setUser] = useState(null);
   const [initialized, setInitialized] = useState(false);
   const [taskRecordsMap, setTaskRecordsMap] = useState({});
