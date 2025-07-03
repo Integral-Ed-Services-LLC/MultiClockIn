@@ -8,7 +8,7 @@ import {
 
 const USER_EMAIL = 'david@integral-ed.com';
 
-function App({ userData }) {
+function App() {
   const [user, setUser] = useState(null);
   const [initialized, setInitialized] = useState(false);
   const [taskRecordsMap, setTaskRecordsMap] = useState({});
@@ -44,19 +44,6 @@ function App({ userData }) {
 
   useEffect(() => {
     loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    function handleUserMessage(event) {
-      if (event.data && (event.data.email || event.data.firstName)) {
-        // Use event.data.email or event.data.firstName to fetch user from Airtable
-        // Example: findTeamMemberByEmail(event.data.email)
-        // or: findTeamMemberByFirstName(event.data.firstName)
-        // Then setUser(...) and load the rest of the app
-      }
-    }
-    window.addEventListener('message', handleUserMessage);
-    return () => window.removeEventListener('message', handleUserMessage);
   }, []);
 
   return !initialized ? (
