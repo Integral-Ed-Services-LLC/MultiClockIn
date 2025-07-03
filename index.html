@@ -15,25 +15,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Open+Sans:wght@800&display=swap"
       rel="stylesheet"
     />
-    <script>
-      // Debug logging for user identification
-      console.log('[ClockIn] Script loaded, waiting for user identification message...');
-      window.addEventListener('message', (event) => {
-        console.log('[ClockIn] postMessage received:', event.data);
-        if (event.data && (event.data.email || event.data.firstName)) {
-          console.log('[ClockIn] User data found:', event.data);
-          document.getElementById('user-email').innerText = event.data.email || '(none)';
-          document.getElementById('user-firstname').innerText = event.data.firstName || '(none)';
-        } else {
-          console.warn('[ClockIn] No valid user data in message:', event.data);
-        }
-      });
-    </script>
   </head>
   <body>
-    <div style="margin: 1em 0; font-size: 1.1em; color: #444;">
-      <b>Loaded user:</b> email: <span id="user-email">(none)</span> | first name: <span id="user-firstname">(none)</span>
-    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
