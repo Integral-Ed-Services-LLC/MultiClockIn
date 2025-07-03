@@ -155,10 +155,10 @@ export function writeEntriesToTimesheet(entries, userId) {
   });
 }
 
-export async function findTeamMemberByFirstName(firstName) {
+export async function findTeamMemberByEmail(email) {
   const result = await TimesheetBase('team')
     .select({
-      filterByFormula: `{First Name} = '${firstName}'`,
+      filterByFormula: `{email} = '${email}'`,
       maxRecords: 1
     })
     .firstPage();

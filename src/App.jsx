@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import TimesheetEntryTable from './pages/Timesheet/Timesheet-Entry-Table';
 import {
-  findTeamMemberByFirstName,
   getTaskAndSprints,
-  getBillingCodes
+  getBillingCodes,
+  findTeamMemberByEmail
 } from './airtable/apis';
 
-const USER_FIRST_NAME = 'David';
+const USER_EMAIL = 'david@integral-ed.com';
 
 function App({ userData }) {
   const [user, setUser] = useState(null);
@@ -17,11 +17,17 @@ function App({ userData }) {
   const [billingCodesList, setBillingCodesList] = useState([]);
   const [billingCodesMap, setBillingCodesMap] = useState({});
   const [billingCodesSprints, setBillingCodesSprints] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null);
 
   async function loadInitialData() {
     setInitialized(false);
-    const teamMember = await findTeamMemberByFirstName(USER_FIRST_NAME);
+    const teamMember = await findTeamMemberByEmail(USER_EMAIL);
     setUser(teamMember);
+    if (!teamMember) {
+      setErrorMessage('Cannot load the user data!');
+      setInitialized(true);
+      return;
+    }
     const { taskIdToRecordId, parsedTasks, sprintsMap } =
       await getTaskAndSprints(teamMember.id);
     setTaskRecordsMap(taskIdToRecordId);
@@ -32,6 +38,7 @@ function App({ userData }) {
     setBillingCodesList(billingCodes);
     setBillingCodesMap(billingCodeToRecordsMap);
     setBillingCodesSprints(sprintMap);
+    setErrorMessage(null);
     setInitialized(true);
   }
 
@@ -54,6 +61,8 @@ function App({ userData }) {
 
   return !initialized ? (
     'Initializing the App...'
+  ) : errorMessage ? (
+    errorMessage
   ) : (
     <TimesheetEntryTable
       taskRecordsMap={taskRecordsMap}
