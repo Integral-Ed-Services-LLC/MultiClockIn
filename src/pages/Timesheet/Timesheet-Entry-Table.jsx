@@ -4,8 +4,6 @@ import classes from './TimesheetPage.module.css';
 import TimesheetEntry from '../../components/Timesheet/Timesheet-Entry';
 import { writeEntriesToTimesheet } from '../../airtable/apis';
 
-const getUserName = (user) => user['First Name'] + ' ' + user['Last Name'];
-
 function isValidEntry(entry) {
   const notesFilled = entry.notes && entry.notes.trim() !== '';
   const minutesValid = parseInt(entry.minutes, 10) > 0;
@@ -110,7 +108,7 @@ function TimesheetEntryTable({
 
   return (
     <div className={classes['timesheet-table-container']}>
-      <h3>Timesheet Entries for {getUserName(user)}</h3>
+      <h3>Timesheet Entries for {user['Full Name']}</h3>
       {loading ? (
         'Loading...'
       ) : (
