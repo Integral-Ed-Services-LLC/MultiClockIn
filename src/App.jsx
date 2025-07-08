@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TimesheetEntryTable from './pages/Timesheet/Timesheet-Entry-Table';
 import {
   getTaskAndSprints,
   getBillingCodes,
   findTeamMemberByEmail
 } from './airtable/apis';
-
-const USER_EMAIL = 'david@integral-ed.com';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -19,9 +17,12 @@ function App() {
   const [billingCodesSprints, setBillingCodesSprints] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
 
+  const params = new URLSearchParams(window.location.search);
+  const userEmail = params.get('email');
+
   async function loadInitialData() {
     setInitialized(false);
-    const teamMember = await findTeamMemberByEmail(USER_EMAIL);
+    const teamMember = await findTeamMemberByEmail(userEmail);
     setUser(teamMember);
     if (!teamMember) {
       setErrorMessage('Cannot load the user data!');
@@ -43,8 +44,13 @@ function App() {
   }
 
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    if (userEmail) {
+      loadInitialData();
+    } else {
+      setErrorMessage('No email provided in the search url.');
+      setInitialized(true);
+    }
+  }, [userEmail]);
 
   return !initialized ? (
     'Initializing the App...'

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://IntegralEd.github.io/MultiClockIn/",
+  "homepage": "https://IntegralEd.github.io/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
