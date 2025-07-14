@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import classes from './Timesheet.module.css';
+import FilterableDropdown from '../../utils/components/Filterable-Dropdown';
 
 function TimesheetEntry({
   index,
@@ -102,25 +103,10 @@ function TimesheetEntry({
           <label className={classes['task-input-label']} htmlFor="jobCode">
             Job Code:
           </label>
-          <select
-            className={classes['task-input']}
-            id="jobCode"
-            name="jobCode"
-            value={jobCode}
-            onChange={(e) => onJobCodeChange(e.target.value)}
-            disabled={task}
-          >
-            <option value="">
-              {selectableTasks.length > 0
-                ? '-- Select Job Code --'
-                : 'No Available Job Code'}
-            </option>
-            {selectableBillingCodes.map((billingCode, index) => (
-              <option key={index} value={billingCode.id}>
-                {billingCode.label}
-              </option>
-            ))}
-          </select>
+          <FilterableDropdown
+            options={selectableBillingCodes}
+            onSelect={onJobCodeChange}
+          />
         </div>
         <div className={classes['task-input-item']}>
           <label className={classes['task-input-label']} htmlFor="sprintCode">

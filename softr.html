@@ -1,56 +1,41 @@
-<!-- <!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Embed MultiClockIn in Softr</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .loading-message { text-align: center; margin-top: 40px; font-size: 1.2em; color: #666; }
-        iframe { width: 100%; height: 600px; border: none; }
-        .debug { margin: 1em 0; color: #444; font-size: 1.1em; }
+      body {
+        font-family: Arial, sans-serif;
+      }
+      iframe {
+        width: 100%;
+        height: 600px;
+        border: none;
+      }
+      .greeting {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 1.5em;
+        color: #333;
+      }
     </style>
-</head>
-<body>
-<div id="embed-container">
-    <div class="loading-message" id="loading-msg">Waiting for user info...</div>
-    <div class="debug" id="debug-info"></div>
-</div>
-<script>
-console.log('[SoftrEmbed] Script loaded, looking for window.logged_in_user...');
-console.log('[SoftrEmbed] window.logged_in_user:', window.logged_in_user);
-
-(function() {
-    // Try to get the most useful user fields
-    var user = window.logged_in_user || {};
-    var email = user.softr_user_email || user.email || user.EMail || '';
-    var name = user.softr_user_full_name || user.name || user.first_name || '';
-    console.log('[SoftrEmbed] Found email:', email, 'name:', name);
-
-    document.getElementById('debug-info').innerText =
-        `Sending to iframe: email: ${email || '(none)'} | name: ${name || '(none)'}`;
-
-    if (email || name) {
-        document.getElementById('loading-msg').remove();
-        var iframe = document.createElement('iframe');
-        iframe.id = 'clockin-iframe';
-        iframe.src = 'https://integraled.github.io/MultiClockIn/';
-        document.getElementById('embed-container').appendChild(iframe);
-        iframe.onload = function() {
-            console.log('[SoftrEmbed] Sending postMessage to iframe:', { email, name });
-            iframe.contentWindow.postMessage({ email, name }, '*');
-        };
-    } else {
-        document.getElementById('loading-msg').innerText = 'User info not available.';
-        console.warn('[SoftrEmbed] No email or name available to send to iframe.');
-    }
-})();
-</script>
-</body>
-</html> -->
-
-<iframe
-  src="https://integral-ed-services-llc.github.io/MultiClockIn?email={{user.email}}"
-  title="MultiClockIn App"
->
-</iframe>
+    <script>
+      // Log merge tag values for debugging
+      console.log('LOGGED_IN_USER Name:', '{LOGGED_IN_USER:NAME}');
+      console.log('LOGGED_IN_USER Email:', '{LOGGED_IN_USER:EMAIL}');
+    </script>
+  </head>
+  <body>
+    <div class="greeting">
+      Hi, {LOGGED_IN_USER:NAME}!<br />
+      {LOGGED_IN_USER:EMAIL}
+    </div>
+    <!-- Embedded app with tokenized URL -->
+    <iframe
+      id="clockin-iframe"
+      src="https://integral-ed-services-llc.github.io/MultiClockIn?email={LOGGED_IN_USER:EMAIL}"
+      title="MultiClockIn App"
+    ></iframe>
+  </body>
+</html>
