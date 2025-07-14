@@ -64,7 +64,9 @@ export async function getBillingCodes(teamId) {
   const user = await TimesheetBase('team').find(teamId);
   const billingCodeUnCleaned = user.get('billing-codes-timesheet-ddl') || [];
   const billingCodeValues =
-    billingCodeUnCleaned.length > 0 ? billingCodeUnCleaned[0].split(';') : [];
+    billingCodeUnCleaned.length > 0 && billingCodeUnCleaned[0]
+      ? billingCodeUnCleaned[0].split(';')
+      : [];
 
   if (billingCodeValues.length === 0) {
     return {
@@ -127,7 +129,9 @@ export async function getBillingCodes(teamId) {
   });
 
   return {
-    billingCodes: billingCodeValues,
+    billingCodes: [...new Set(billingCodeValues)].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    ),
     billingCodeToRecordsMap,
     sprintMap
   };
