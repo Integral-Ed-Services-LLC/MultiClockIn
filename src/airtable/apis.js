@@ -128,8 +128,6 @@ export async function getBillingCodes(teamId) {
     });
   });
 
-  console.log(billingCodeValues, billingCodeToRecordsMap, sprintMap);
-
   return {
     billingCodes: [...new Set(billingCodeValues)].sort((a, b) =>
       a.localeCompare(b, undefined, { sensitivity: 'base' })
