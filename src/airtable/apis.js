@@ -104,14 +104,18 @@ export async function getBillingCodes(teamId) {
   // // Step 3: Get all relevant project IDs
   const projectIds = [...new Set(Object.values(billingCodeMap))];
 
-  const sprintFilter = `OR(${projectIds.map((id) => `{${Fields.SprintProjectLink}} = '${id}'`).join(',')})`;
+  let sprints = [];
 
-  const sprints = await TimesheetBase(Tables.Sprints)
-    .select({
-      filterByFormula: sprintFilter,
-      fields: [Fields.SprintCode, Fields.SprintProjectLink]
-    })
-    .all();
+  if (projectIds.length > 0) {
+    const sprintFilter = `OR(${projectIds.map((id) => `{${Fields.SprintProjectLink}} = '${id}'`).join(',')})`;
+
+    sprints = await TimesheetBase(Tables.Sprints)
+      .select({
+        filterByFormula: sprintFilter,
+        fields: [Fields.SprintCode, Fields.SprintProjectLink]
+      })
+      .all();
+  }
 
   // Step 5: Build sprint map: billing-code → list of { sprintId, sprintCode }
   const sprintMap = {}; // billing-code → array of sprints

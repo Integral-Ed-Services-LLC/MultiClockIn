@@ -3,7 +3,7 @@ export const EnvironmentTypes = {
   PRODUCTION: 'production'
 };
 
-export const ENV = import.meta.env.ENV || EnvironmentTypes.DEVELOP;
+export const ENV = import.meta.env.VITE_ENV || EnvironmentTypes.DEVELOP;
 
 export const AirtableConfig = {
   API_KEY: import.meta.env.VITE_AIRTABLE_API_KEY,

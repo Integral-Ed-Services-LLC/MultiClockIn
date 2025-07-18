@@ -13,7 +13,6 @@ const FilterableDropdown = ({ options = [], onSelect }) => {
   const handleSelect = (selectedOption) => {
     setInputValue(selectedOption.label);
     setShowOptions(false);
-    // console.log(selectedOption.id);
     onSelect?.(selectedOption.id);
   };
 
