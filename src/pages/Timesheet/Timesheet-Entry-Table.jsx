@@ -108,7 +108,7 @@ function TimesheetEntryTable({
 
   return (
     <div className={classes['timesheet-table-container']}>
-      <h3>Timesheet Entries for {user['Full Name']}</h3>
+      <h3>Timesheet Entries for {user.fullName}</h3>
       {loading ? (
         'Loading...'
       ) : (

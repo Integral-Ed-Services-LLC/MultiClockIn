@@ -1,8 +1,13 @@
 import { TimesheetBase } from './airtable-base';
+import { TablesMapping, FieldsMapping } from './tables-mappings';
+import { ENV } from '../config';
+
+const Tables = TablesMapping[ENV];
+const Fields = FieldsMapping[ENV];
 
 export async function getTaskAndSprints(teamId) {
-  const team = await TimesheetBase('team').find(teamId);
-  const taskValues = team.get('task-ddl-timesheets') || [];
+  const team = await TimesheetBase(Tables.Teams).find(teamId);
+  const taskValues = team.get(Fields.TeamTasksDDL) || [];
 
   const parsedTasks = taskValues.map((value) => {
     const [idPart, ...nameParts] = value.split(' - ');
@@ -15,25 +20,25 @@ export async function getTaskAndSprints(teamId) {
 
   const taskIdList = parsedTasks.map((t) => t.taskId);
 
-  const taskRecords = await TimesheetBase('tasks')
+  const taskRecords = await TimesheetBase(Tables.Tasks)
     .select({
-      filterByFormula: `OR(${taskIdList.map((id) => `{Task_ID} = '${id}'`).join(',')})`
+      filterByFormula: `OR(${taskIdList.map((id) => `{${Fields.TaskID}} = '${id}'`).join(',')})`
     })
     .all();
 
   const taskIdToRecordId = {};
   taskRecords.forEach((task) => {
-    const taskId = task.get('Task_ID');
+    const taskId = task.get(Fields.TaskID);
     if (taskId) {
       taskIdToRecordId[taskId] = {
         recordId: task.id,
-        billingCode: task.fields['billing-code']
+        billingCode: task.fields[Fields.TaskBillingCode]
       };
     }
   });
 
-  const sprints = await TimesheetBase('sprints')
-    .select({ fields: ['tasks-linked'] })
+  const sprints = await TimesheetBase(Tables.Sprints)
+    .select({ fields: [Fields.SprintLinkedTasks] })
     .all();
 
   const sprintsMap = {};
@@ -44,7 +49,7 @@ export async function getTaskAndSprints(teamId) {
 
     if (recordId) {
       for (const sprint of sprints) {
-        const linkedTasks = sprint.fields['tasks-linked'] || [];
+        const linkedTasks = sprint.fields[Fields.SprintLinkedTasks] || [];
         if (linkedTasks.includes(recordId)) {
           sprintsMap[recordId] = [sprint.id];
           break;
@@ -61,8 +66,8 @@ export async function getTaskAndSprints(teamId) {
 }
 
 export async function getBillingCodes(teamId) {
-  const user = await TimesheetBase('team').find(teamId);
-  const billingCodeUnCleaned = user.get('billing-codes-timesheet-ddl') || [];
+  const user = await TimesheetBase(Tables.Teams).find(teamId);
+  const billingCodeUnCleaned = user.get(Fields.TeamBillingCodesDDL) || [];
   const billingCodeValues =
     billingCodeUnCleaned.length > 0 && billingCodeUnCleaned[0]
       ? billingCodeUnCleaned[0].split(';')
@@ -75,12 +80,12 @@ export async function getBillingCodes(teamId) {
     };
   }
 
-  const billingCodeFilter = `OR(${billingCodeValues.map((v) => `{billing-code} = "${v}"`).join(',')})`;
+  const billingCodeFilter = `OR(${billingCodeValues.map((v) => `{${Fields.BillingCode}} = "${v}"`).join(',')})`;
 
-  const billingCodeRecords = await TimesheetBase('billing-codes')
+  const billingCodeRecords = await TimesheetBase(Tables.BillingCodes)
     .select({
       filterByFormula: billingCodeFilter,
-      fields: ['billing-code', 'projects-link']
+      fields: [Fields.BillingCode, Fields.BillingCodeProjectsLink]
     })
     .all();
 
@@ -88,9 +93,9 @@ export async function getBillingCodes(teamId) {
 
   const billingCodeMap = {};
   billingCodeRecords.forEach((record) => {
-    const code = record.get('billing-code');
+    const code = record.get(Fields.BillingCode);
     billingCodeToRecordsMap[code] = record.id;
-    const projectId = (record.get('projects-linked') || [])[0]; // single value
+    const projectId = (record.get(Fields.BillingCodeProjectsLink) || [])[0]; // single value
     if (code && projectId) {
       billingCodeMap[code] = projectId;
     }
@@ -99,12 +104,12 @@ export async function getBillingCodes(teamId) {
   // // Step 3: Get all relevant project IDs
   const projectIds = [...new Set(Object.values(billingCodeMap))];
 
-  const sprintFilter = `OR(${projectIds.map((id) => `{project-link} = '${id}'`).join(',')})`;
+  const sprintFilter = `OR(${projectIds.map((id) => `{${Fields.SprintProjectLink}} = '${id}'`).join(',')})`;
 
-  const sprints = await TimesheetBase('sprints')
+  const sprints = await TimesheetBase(Tables.Sprints)
     .select({
       filterByFormula: sprintFilter,
-      fields: ['sprint-code', 'project-link']
+      fields: [Fields.SprintCode, Fields.SprintProjectLink]
     })
     .all();
 
@@ -113,8 +118,8 @@ export async function getBillingCodes(teamId) {
   billingCodeValues.forEach((code) => (sprintMap[code] = []));
 
   sprints.forEach((sprint) => {
-    const sprintProjectId = (sprint.get('project-link') || [])[0];
-    const sprintCode = sprint.get('sprint-code');
+    const sprintProjectId = (sprint.get(Fields.SprintProjectLink) || [])[0];
+    const sprintCode = sprint.get(Fields.SprintCode);
     const sprintId = sprint.id;
 
     // Match each billing-code string that links to this project
@@ -140,16 +145,16 @@ export async function getBillingCodes(teamId) {
 export function writeEntriesToTimesheet(entries, userId) {
   const cleanedEntries = entries.map((entry) => ({
     fields: {
-      'billing-code': entry.billingCode,
-      Start_Time_Manual: entry.startTime,
-      Notes: entry.notes,
-      Team_Member: [userId],
-      'minutes-entered': parseInt(entry.minutes, 10)
+      [Fields.TimesheetBillingCode]: entry.billingCode,
+      [Fields.TimesheetStartTimeManual]: entry.startTime,
+      [Fields.TimesheetNotes]: entry.notes,
+      [Fields.TimesheetTeamMember]: [userId],
+      [Fields.TimesheetMinutesEntered]: parseInt(entry.minutes, 10)
     }
   }));
 
   return new Promise((resolve, reject) => {
-    TimesheetBase('timesheets').create(cleanedEntries, (err, records) => {
+    TimesheetBase(Tables.Timesheets).create(cleanedEntries, (err, records) => {
       if (err) {
         console.log('Error creating record:', err);
         return reject(err);
@@ -160,9 +165,9 @@ export function writeEntriesToTimesheet(entries, userId) {
 }
 
 export async function findTeamMemberByEmail(email) {
-  const result = await TimesheetBase('team')
+  const result = await TimesheetBase(Tables.Teams)
     .select({
-      filterByFormula: `{email} = '${email}'`,
+      filterByFormula: `{${Fields.TeamEmail}}} = '${email}'`,
       maxRecords: 1
     })
     .firstPage();
@@ -174,6 +179,6 @@ export async function findTeamMemberByEmail(email) {
   const user = result[0];
   return {
     id: user.id,
-    ...user.fields
+    fullName: user.fields[Fields.TeamFullName]
   };
 }
