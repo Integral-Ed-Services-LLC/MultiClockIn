@@ -167,7 +167,7 @@ export function writeEntriesToTimesheet(entries, userId) {
 export async function findTeamMemberByEmail(email) {
   const result = await TimesheetBase(Tables.Teams)
     .select({
-      filterByFormula: `{${Fields.TeamEmail}}} = '${email}'`,
+      filterByFormula: `{${Fields.TeamEmail}} = '${email}'`,
       maxRecords: 1
     })
     .firstPage();
