@@ -9,14 +9,16 @@ export async function getTaskAndSprints(teamId) {
   const team = await TimesheetBase(Tables.Teams).find(teamId);
   const taskValues = team.get(Fields.TeamTasksDDL) || [];
 
-  const parsedTasks = taskValues.map((value) => {
-    const [idPart, ...nameParts] = value.split(' - ');
-    return {
-      original: value,
-      taskId: idPart.trim(),
-      taskName: nameParts.join(' - ').trim()
-    };
-  });
+  const parsedTasks = taskValues
+    .map((value) => {
+      const [idPart, ...nameParts] = value.split(' - ');
+      return {
+        original: value,
+        taskId: idPart.trim(),
+        taskName: nameParts.join(' - ').trim()
+      };
+    })
+    .sort((a, b) => a.original.localeCompare(b.original));
 
   const taskIdList = parsedTasks.map((t) => t.taskId);
 

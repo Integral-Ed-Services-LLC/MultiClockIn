@@ -80,24 +80,10 @@ function TimesheetEntry({
           <label className={classes['task-input-label']} htmlFor="task">
             Task:
           </label>
-          <select
-            className={classes['task-input']}
-            id="task"
-            name="task"
-            value={task}
-            onChange={(e) => onTaskChange(e.target.value)}
-          >
-            <option value="">
-              {selectableTasks.length > 0
-                ? '-- Select Task --'
-                : 'No Available Task'}
-            </option>
-            {selectableTasks.map((taskVal, index) => (
-              <option key={index} value={taskVal.id}>
-                {taskVal.label}
-              </option>
-            ))}
-          </select>
+          <FilterableDropdown
+            options={selectableTasks}
+            onSelect={onTaskChange}
+          />
         </div>
         <div className={classes['task-input-item']}>
           <label className={classes['task-input-label']} htmlFor="jobCode">
