@@ -1,79 +1,22 @@
 .timesheet-form {
-  padding: 10px;
   display: flex;
   flex-direction: row;
   gap: 10px;
-  border: 1px solid #807ef1;
-  width: 80%;
-  height: 150px;
-  justify-content: space-between;
+  border: 1px solid #ccc;
+  width: 100%;
   border-radius: 10px;
+  box-sizing: border-box;
+  padding: 10px;
 }
 
 .notes-input-item {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 50%;
-  text-align: center;
-  height: 100%;
+  width: 45%;
 }
 
-.notes-input {
-  height: 100%;
-  resize: none;
-  padding: 10px;
-  font-size: 15px;
-  outline: none;
-  border-radius: 5px;
-}
-
-.task-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 30%;
-  justify-content: space-around;
-}
-
-.task-input-item {
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
-  width: 100%;
-  gap: 10px;
-}
-
-.task-input {
-  width: 70%;
-}
-
-.timesheet-input {
-  padding: 5px;
+.dropdown-input-item {
+  width: 15%;
 }
 
 .minutes-input-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.minutes-input-section {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  padding: 10px;
-}
-
-.minutes-input {
-  border: 1px solid #00000077;
-  outline: none;
-  padding: 5px;
-  font-size: 15px;
-}
-
-.check-input-item {
-  display: flex;
-  flex-direction: row;
+  width: 10%;
 }

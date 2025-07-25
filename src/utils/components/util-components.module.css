@@ -1,6 +1,6 @@
 .dropdown {
   position: relative;
-  width: 70%;
+  width: 100%;
   font-family: sans-serif;
 }
 
@@ -10,6 +10,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  background-color: #f5f5f5;
 }
 
 .options {

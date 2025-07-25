@@ -2,44 +2,43 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 80vw;
 }
 
-.add-timesheet-btn {
-  width: 300px;
-  margin-bottom: 10px;
-}
-
-.time-progress-div {
-  width: 1440px;
+.date-input-container {
   display: flex;
   flex-direction: column;
+  width: 20%;
+  gap: 10px;
 }
 
-.time-progress-bar {
+.bottom-btn {
   width: 100%;
-  background-color: #c7c7c7;
-  border-radius: 10px;
-  height: 50px;
 }
 
-.time-labels {
-  width: 100%;
+.add-timesheet-btn-container {
+  width: 20%;
+}
+
+.submit-btn-container {
+  width: 10%;
+}
+
+.bottom-buttons-container {
   display: flex;
   flex-direction: row;
+  width: 100%;
   justify-content: space-between;
 }
 
-.minutes-progress {
-  background-color: #696868;
-  border-radius: 10px;
-  height: 100%;
-  color: white;
+.total-container-row {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: end;
+  width: 100%;
 }
 
-.date-time-input {
-  width: 300px;
-  padding: 5px;
+.total-container {
+  display: flex;
+  justify-content: space-between;
+  width: 10%;
 }

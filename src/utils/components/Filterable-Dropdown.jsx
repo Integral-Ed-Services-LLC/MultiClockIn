@@ -1,7 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import classes from './util-components.module.css'; // updated import
 
-const FilterableDropdown = ({ options = [], onSelect }) => {
+const FilterableDropdown = ({
+  options = [],
+  onSelect,
+  placeholder,
+  disabled,
+  ...rest
+}) => {
   const [inputValue, setInputValue] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const dropdownRef = useRef(null);
@@ -32,10 +38,12 @@ const FilterableDropdown = ({ options = [], onSelect }) => {
       <input
         type="text"
         className={classes.input}
-        placeholder="Select option..."
+        placeholder={placeholder || 'Select option...'}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
+        disabled={disabled}
         onClick={() => setShowOptions(true)}
+        {...rest}
       />
       {showOptions && (
         <div className={classes.options}>

@@ -3,19 +3,25 @@ import { useState } from 'react';
 import classes from './TimesheetPage.module.css';
 import TimesheetEntry from '../../components/Timesheet/Timesheet-Entry';
 import { writeEntriesToTimesheet } from '../../airtable/apis';
+import Input from '../../utils/components/Input';
 
 function isValidEntry(entry) {
   const notesFilled = entry.notes && entry.notes.trim() !== '';
   const minutesValid = parseInt(entry.minutes, 10) > 0;
-  const doneIsTrue = entry.done === true;
 
   const taskFilled = entry.task && entry.task.trim() !== '';
   const jobCodeFilled = entry.jobCode.trim() !== '';
 
-  const condition1 = notesFilled && minutesValid && doneIsTrue;
+  const condition1 = notesFilled && minutesValid;
   const condition2 = taskFilled || jobCodeFilled;
 
   return condition1 && condition2;
+}
+
+function formatToHHMM(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
 function TimesheetEntryTable({
@@ -40,8 +46,7 @@ function TimesheetEntryTable({
         task: '',
         sprintCode: '',
         notes: '',
-        minutes: 1,
-        done: false
+        minutes: ''
       });
       return newArray;
     });
@@ -81,9 +86,7 @@ function TimesheetEntryTable({
   async function onSubmit() {
     const allValid = timeEntries.every(isValidEntry);
     if (!allValid) {
-      setErrorMessage(
-        'You have not filled a field in some entry, or have not checked some entry as done'
-      );
+      setErrorMessage('You have not filled a field in some entry!');
       return;
     }
     setLoading(true);
@@ -101,62 +104,25 @@ function TimesheetEntryTable({
     }
   }
 
-  const minutesProgress = timeEntries.reduce(
-    (sum, item) => (item.done ? sum + parseInt(item.minutes, 10) : sum),
+  const totalMinutes = timeEntries.reduce(
+    (sum, item) => sum + parseInt(item.minutes || '0', 10),
     0
   );
 
   return (
     <div className={classes['timesheet-table-container']}>
-      <h3>Timesheet Entries for {user.fullName}</h3>
       {loading ? (
         'Loading...'
       ) : (
         <>
-          <div className={classes['time-progress-div']}>
-            <div className={classes['time-progress-bar']}>
-              <div
-                className={classes['minutes-progress']}
-                style={{
-                  width: Math.min(minutesProgress, 480) * 3
-                }}
-              >
-                {minutesProgress >= 25
-                  ? `${minutesProgress > 480 ? '480+' : minutesProgress}mins`
-                  : ''}
-              </div>
-            </div>
-            <div className={classes['time-labels']}>
-              <div>0m</div>
-              <div>80m</div>
-              <div>160m</div>
-              <div>240m</div>
-              <div>320m</div>
-              <div>400m</div>
-              <div>480m</div>
-            </div>
-          </div>
-          <div>
-            Select Date:{' '}
-            <input
+          <div className={classes['date-input-container']}>
+            <b>Date:</b>
+            <Input
               type="date"
-              className={classes['date-time-input']}
               value={timeSheetDate}
               onChange={(e) => setTimesheetDate(e.target.value)}
             />
           </div>
-          <button
-            className={'btn-primary' + ' ' + classes['add-timesheet-btn']}
-            style={
-              !timeSheetDate
-                ? { backgroundColor: '#0000ff75', cursor: 'not-allowed' }
-                : {}
-            }
-            onClick={onAddTimeEntry}
-            disabled={!timeSheetDate}
-          >
-            Add Timesheet Entry
-          </button>
           <div style={{ color: 'red' }}>{errorMessage}</div>
           {timeEntries.map((entry, index) => (
             <TimesheetEntry
@@ -176,13 +142,46 @@ function TimesheetEntryTable({
             />
           ))}
           {timeEntries.length > 0 ? (
-            <button
-              style={{ width: '81%', marginTop: 10, marginLeft: 3 }}
-              className="btn-success"
-              onClick={onSubmit}
-            >
-              Submit Entries
-            </button>
+            <div className={classes['total-container-row']}>
+              <div className={classes['total-container']}>
+                <div>
+                  <b>Total:</b>
+                </div>
+                <div>
+                  <b>{formatToHHMM(totalMinutes)}</b>
+                </div>
+              </div>
+            </div>
+          ) : (
+            ''
+          )}
+          {timeSheetDate ? (
+            <div className={classes['bottom-buttons-container']}>
+              <div className={classes['add-timesheet-btn-container']}>
+                <button
+                  className={'btn-primary' + ' ' + classes['bottom-btn']}
+                  onClick={onAddTimeEntry}
+                  style={{
+                    backgroundColor: '#FDBA4E',
+                    color: '#2D3748'
+                  }}
+                >
+                  Add Timesheet Entry
+                </button>
+              </div>
+              {timeEntries.length > 0 ? (
+                <div className={classes['submit-btn-container']}>
+                  <button
+                    className={'btn-success' + ' ' + classes['bottom-btn']}
+                    onClick={onSubmit}
+                  >
+                    Submit All
+                  </button>
+                </div>
+              ) : (
+                ''
+              )}
+            </div>
           ) : (
             ''
           )}
